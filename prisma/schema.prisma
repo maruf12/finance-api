@@ -10,6 +10,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Group {
+  id            String      @id @default(uuid())
+  userUsername  String      @db.VarChar(100)
+  name          String      @db.VarChar(100)
+  description   String?
+  archived      Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  user          User        @relation(fields: [userUsername], references: [username], onDelete: Cascade)
+  categories    Category[]
+  expenses      Expense[]
+
+  @@unique([userUsername, name])
+  @@map("groups")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  groupId   String
+  name      String    @db.VarChar(100)
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  expenses  Expense[]
+
+  // Unique category name per group
+  @@unique([groupId, name])
+  @@index([groupId])
+  @@map("categories")
+}
+
+model Expense {
+  id            String     @id @default(uuid())
+  userUsername  String     @db.VarChar(100)
+  groupId       String
+  categoryId    String?
+  tanggal       DateTime
+  title         String
+  amount        Decimal    @db.Decimal(18, 2) // negative = expense, positive = income
+  note          String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  user          User       @relation(fields: [userUsername], references: [username], onDelete: Cascade)
+  group         Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  category      Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userUsername, tanggal])
+  @@index([groupId])
+  @@index([categoryId])
+  @@map("expenses")
+}
 model User {
   username String    @id @db.VarChar(100)
   password String    @db.VarChar(100)
@@ -18,6 +76,9 @@ model User {
   email    String   @unique @db.VarChar(100)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Group Group[]
+  Expense Expense[]
 
   @@map("users")
 }
