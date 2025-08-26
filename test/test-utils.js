@@ -28,3 +28,29 @@ export const getTestUser = async () => {
     },
   })
 }
+
+export const removeAllTestGroup = async () => {
+  await prismaClient.group.deleteMany({
+    where: {
+      userUsername: "test"
+    }
+  })
+}
+
+export const createTestGroup = async () => {
+  return prismaClient.group.create({
+    data: {
+      name: "Test Group",
+      description: "This is a test group",
+      userUsername: "test"
+    }
+  })
+}
+
+export const getTestGroup = async () => {
+  return prismaClient.group.findFirst({
+    where: {
+      userUsername: "test"
+    }
+  })
+}
