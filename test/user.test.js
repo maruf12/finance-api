@@ -303,3 +303,45 @@ describe("PATCH /api/users/current", () => {
       expect(result.body.errors).toBeDefined();
   });
 })
+
+describe("DELETE /api/users/logout", () => {
+
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeTestUser();
+  });
+
+  it("should logout current user", async () => {
+    let result = await supertest(web)
+      .delete("/api/users/logout")
+      .set("Authorization", "test")
+
+      logger.info(result.body);
+      expect(result.status).toBe(200);
+      expect(result.body.data).toBe("OK");
+
+      const user = await getTestUser();
+      expect(user.token).toBeNull();
+  });
+
+  it("should reject if token not provided", async () => {
+    const result = await supertest(web)
+      .delete("/api/users/logout")
+
+      // logger.info(result.body);
+
+      expect(result.status).toBe(401);
+      expect(result.body.errors).toBeDefined();
+  });
+  it("should reject if token is invalid", async () => {
+    const result = await supertest(web)
+      .delete("/api/users/logout")
+      .set("Authorization", "invalid")
+      // logger.info(result.body);
+      expect(result.status).toBe(401);
+      expect(result.body.errors).toBeDefined();
+  });
+})
