@@ -103,8 +103,35 @@ const get = async (user, groupId, categoryId) => {
   return category;
 }
 
+const remove = async (user, groupId, categoryId) => {
+  groupId = await checkGroupMustExist(user, groupId);
+  categoryId = validate(getCategoryValidation, categoryId);
+
+  // Pastikan category ada dan milik group yang benar
+  const category = await prismaClient.category.findFirst({
+    where: {
+      id: categoryId,
+      groupId: groupId,
+    },
+    select: {
+      id: true
+    }
+  });
+  if (!category) {
+    throw new ResponseError(404, "Category not found");
+  }
+
+  await prismaClient.category.delete({
+    where: {
+      id: categoryId
+    }
+  });
+  return { message: "Category deleted" };
+}
+
 export default {
   create,
   get,
-  update
+  update,
+  remove
 }

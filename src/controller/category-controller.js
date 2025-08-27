@@ -43,8 +43,21 @@ const update = async (req, res, next) => {
   }
 }
 
+const remove = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const groupId = req.params.groupId;
+    const categoryId = req.params.categoryId;
+    const result = await categoryService.remove(user, groupId, categoryId);
+    res.status(200).json(result);
+  } catch (e) {
+    next(e);
+  }
+}
+
 export default {
   create,
   get,
-  update
+  update,
+  remove
 }
