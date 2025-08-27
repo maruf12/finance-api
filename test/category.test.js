@@ -159,3 +159,38 @@ describe('PUT /api/groups/:groupId/categories/:categoryId', () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe('DELETE /api/groups/:groupId/categories/:categoryId', () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+  });
+
+  afterEach(async () => {
+    await removeAllTestCategory();
+    await removeAllTestGroup();
+    await removeTestUser();
+  });
+
+  it('should delete a category', async () => {
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    const result = await supertest(web)
+      .delete(`/api/groups/${testGroup.id}/categories/${testCategory.id}`)
+      .set('Authorization', `test`);
+
+    expect(result.status).toBe(200);
+    expect(result.body.message).toBe('Category deleted');
+  });
+
+  it('should reject if category not found', async () => {
+    const testGroup = await getTestGroup();
+    const result = await supertest(web)
+      .delete(`/api/groups/${testGroup.id}/categories/invalid-uuid-1234`)
+      .set('Authorization', `test`);
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+});
