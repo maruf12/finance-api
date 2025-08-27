@@ -4,7 +4,8 @@
   "description": "Finance API",
   "main": "src/main.js",
   "scripts": {
-    "test": "jest -i"
+    "test": "jest -i src/__test__/*.test.js",
+    "test-group": "jest -i test/group.test.js"
   },
   "jest": {
     "transform": {

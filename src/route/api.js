@@ -13,7 +13,9 @@ userRouter.delete('/api/users/logout', userController.logout);
 // Groups routes
 userRouter.post('/api/groups', groupController.create);
 userRouter.get('/api/groups/:groupId', groupController.get);
-
+userRouter.put('/api/groups/:groupId', groupController.update);
+userRouter.delete('/api/groups/:groupId', groupController.remove);
+userRouter.get('/api/groups/', groupController.list);
 
 export {
   userRouter
