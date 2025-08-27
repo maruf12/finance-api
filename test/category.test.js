@@ -98,3 +98,64 @@ describe('GET /api/groups/:groupId/categories/:categoryId', () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe('PUT /api/groups/:groupId/categories/:categoryId', () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+  });
+
+  afterEach(async () => {
+    await removeAllTestCategory();
+    await removeAllTestGroup();
+    await removeTestUser();
+  });
+
+  it('should update a category', async () => {
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    const result = await supertest(web)
+      .put(`/api/groups/${testGroup.id}/categories/${testCategory.id}`)
+      .set('Authorization', `test`)
+      .send({
+        name: 'Updated Category',
+        note: 'Updated note',
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.name).toBe('Updated Category');
+    expect(result.body.data.note).toBe('Updated note');
+    expect(result.body.data.id).toBe(testCategory.id);
+    expect(result.body.data.updatedAt).toBeDefined();
+  });
+
+  it('should reject if category not found', async () => {
+    const testGroup = await getTestGroup();
+    const result = await supertest(web)
+      .put(`/api/groups/${testGroup.id}/categories/invalid-uuid-1234`)
+      .set('Authorization', `test`)
+      .send({
+        name: 'Updated Category',
+        note: 'Updated note',
+      });
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it('should reject if request invalid', async () => {
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    const result = await supertest(web)
+      .put(`/api/groups/${testGroup.id}/categories/${testCategory.id}`)
+      .set('Authorization', `test`)
+      .send({
+        name: '',
+        note: ''.repeat(300),
+      });
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+});
