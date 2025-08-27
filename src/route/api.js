@@ -20,6 +20,7 @@ userRouter.get('/api/groups/', groupController.list);
 
 // Categories routes
 userRouter.post('/api/:groupId/categories', categoryController.create);
+userRouter.get('/api/groups/:groupId/categories/:categoryId', categoryController.get);
 
 export {
   userRouter

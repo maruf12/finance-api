@@ -2,7 +2,7 @@ import { validate } from "../validation/validation.js"
 import { prismaClient } from "../application/database.js"
 import { ResponseError } from "../error/response-error.js"
 import { getGroupValidation } from "../validation/group-validation.js"
-import { createCategoryValidation } from "../validation/category-validation.js"
+import { createCategoryValidation, getCategoryValidation } from "../validation/category-validation.js"
 
 const checkGroupMustExist = async (user, groupId) => {
   groupId = validate(getGroupValidation, groupId);
@@ -39,6 +39,34 @@ const create = async (user, groupId, request) => {
   });
 }
 
+const get = async (user, groupId, categoryId) => {
+  groupId = await checkGroupMustExist(user, groupId);
+
+  categoryId = validate(getCategoryValidation, categoryId);
+
+  const category = await prismaClient.category.findFirst({
+    where: {
+      id: categoryId,
+      groupId: groupId,
+    },
+    select: {
+      id: true,
+      name: true,
+      note: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  })
+
+  if (!category) {
+    // why this code doesnt execute when category not found?
+    throw new ResponseError(404, "Category not found");
+  }
+
+  return category;
+}
+
 export default {
   create,
+  get
 }

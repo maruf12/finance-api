@@ -5,6 +5,9 @@ const createCategoryValidation = Joi.object({
   note: Joi.string().max(255).optional()
 });
 
+const getCategoryValidation = Joi.string().uuid().required();
+
 export {
   createCategoryValidation,
+  getCategoryValidation
 }
