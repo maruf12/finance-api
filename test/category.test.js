@@ -194,3 +194,34 @@ describe('DELETE /api/groups/:groupId/categories/:categoryId', () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe('GET /api/groups/:groupId/categories', () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+  });
+
+  afterEach(async () => {
+    await removeAllTestCategory();
+    await removeAllTestGroup();
+    await removeTestUser();
+  });
+
+  it('should list all categories in group', async () => {
+    const testGroup = await getTestGroup();
+    // Buat beberapa kategori
+    await createTestCategory(2);
+    const result = await supertest(web)
+      .get(`/api/groups/${testGroup.id}/categories`)
+      .set('Authorization', `test`);
+
+    expect(result.status).toBe(200);
+    expect(Array.isArray(result.body.data)).toBe(true);
+    expect(result.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(result.body.data[0].id).toBeDefined();
+    expect(result.body.data[0].name).toBeDefined();
+    expect(result.body.data[0].createdAt).toBeDefined();
+    expect(result.body.data[0].updatedAt).toBeDefined();
+  });
+});

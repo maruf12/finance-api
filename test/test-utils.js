@@ -65,15 +65,29 @@ export const removeAllTestCategory = async () => {
   })
 }
 
-export const createTestCategory = async (groupId) => {
+export const createTestCategory = async (n) => {
   const group = await getTestGroup();
-  await prismaClient.category.create({
-    data: {
-      name: "Test Category",
-      note: "This is a test category",
-      groupId: group.id
+  if (!n || typeof n !== 'number' || n < 2) {
+    // Default: satu category, nama tetap seperti sebelumnya
+    await prismaClient.category.create({
+      data: {
+        name: `Test Category`,
+        note: "This is a test category",
+        groupId: group.id
+      }
+    });
+  } else {
+    // Jika n > 1, buat sebanyak n category dengan nama unik
+    for (let i = 1; i <= n; i++) {
+      await prismaClient.category.create({
+        data: {
+          name: `Test Category ${i}`,
+          note: `This is test category ${i}`,
+          groupId: group.id
+        }
+      });
     }
-  })
+  }
 }
 
 export const getTestCategory = async () => {
