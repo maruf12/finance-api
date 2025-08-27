@@ -64,3 +64,24 @@ export const removeAllTestCategory = async () => {
     }
   })
 }
+
+export const createTestCategory = async (groupId) => {
+  const group = await getTestGroup();
+  await prismaClient.category.create({
+    data: {
+      name: "Test Category",
+      note: "This is a test category",
+      groupId: group.id
+    }
+  })
+}
+
+export const getTestCategory = async () => {
+  return prismaClient.category.findFirst({
+    where: {
+      group: {
+        userUsername: "test"
+      }
+    }
+  })
+}
