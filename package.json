@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "test": "jest -i src/__test__/*.test.js",
-    "test-group": "jest -i test/group.test.js"
+    "test-group": "jest -i test/group.test.js",
+    "test-category": "jest -i test/category.test.js"
   },
   "jest": {
     "transform": {

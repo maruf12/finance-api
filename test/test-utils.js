@@ -54,3 +54,13 @@ export const getTestGroup = async () => {
     }
   })
 }
+
+export const removeAllTestCategory = async () => {
+  await prismaClient.category.deleteMany({
+    where: {
+      group: {
+        userUsername: "test"
+      }
+    }
+  })
+}
