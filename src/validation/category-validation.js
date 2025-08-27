@@ -7,7 +7,13 @@ const createCategoryValidation = Joi.object({
 
 const getCategoryValidation = Joi.string().uuid().required();
 
+const updateCategoryValidation = Joi.object({
+  name: Joi.string().max(100).optional(),
+  note: Joi.string().max(255).optional()
+});
+
 export {
   createCategoryValidation,
-  getCategoryValidation
+  getCategoryValidation,
+  updateCategoryValidation
 }

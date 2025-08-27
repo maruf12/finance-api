@@ -28,7 +28,23 @@ const get = async (req, res, next) => {
   }
 }
 
+const update = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const groupId = req.params.groupId;
+    const categoryId = req.params.categoryId;
+    const request = req.body;
+    const result = await categoryService.update(user, groupId, categoryId, request);
+    res.status(200).json({
+      data: result
+    });
+  } catch (e) {
+    next(e);
+  }
+}
+
 export default {
   create,
-  get
+  get,
+  update
 }

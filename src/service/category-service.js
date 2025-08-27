@@ -2,7 +2,44 @@ import { validate } from "../validation/validation.js"
 import { prismaClient } from "../application/database.js"
 import { ResponseError } from "../error/response-error.js"
 import { getGroupValidation } from "../validation/group-validation.js"
-import { createCategoryValidation, getCategoryValidation } from "../validation/category-validation.js"
+import { createCategoryValidation, getCategoryValidation, updateCategoryValidation } from "../validation/category-validation.js"
+
+const update = async (user, groupId, categoryId, request) => {
+  groupId = await checkGroupMustExist(user, groupId);
+  categoryId = validate(getCategoryValidation, categoryId);
+  const data = validate(updateCategoryValidation, request);
+
+  // Pastikan category ada dan milik group yang benar
+  const category = await prismaClient.category.findFirst({
+    where: {
+      id: categoryId,
+      groupId: groupId,
+    },
+    select: {
+      id: true
+    }
+  });
+  if (!category) {
+    throw new ResponseError(404, "Category not found");
+  }
+
+  return prismaClient.category.update({
+    where: {
+      id: categoryId
+    },
+    data: {
+      ...data,
+      updatedAt: new Date()
+    },
+    select: {
+      id: true,
+      name: true,
+      note: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  });
+}
 
 const checkGroupMustExist = async (user, groupId) => {
   groupId = validate(getGroupValidation, groupId);
@@ -68,5 +105,6 @@ const get = async (user, groupId, categoryId) => {
 
 export default {
   create,
-  get
+  get,
+  update
 }
