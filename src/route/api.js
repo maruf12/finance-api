@@ -23,6 +23,7 @@ userRouter.post('/api/:groupId/categories', categoryController.create);
 userRouter.get('/api/groups/:groupId/categories/:categoryId', categoryController.get);
 userRouter.put('/api/groups/:groupId/categories/:categoryId', categoryController.update);
 userRouter.delete('/api/groups/:groupId/categories/:categoryId', categoryController.remove);
+userRouter.get('/api/groups/:groupId/categories', categoryController.list);
 
 export {
   userRouter

@@ -129,9 +129,26 @@ const remove = async (user, groupId, categoryId) => {
   return { message: "Category deleted" };
 }
 
+const list = async (user, groupId) => {
+  groupId = await checkGroupMustExist(user, groupId);
+  return prismaClient.category.findMany({
+    where: {
+      groupId: groupId,
+    },
+    select: {
+      id: true,
+      name: true,
+      note: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  });
+}
+
 export default {
   create,
   get,
   update,
-  remove
+  remove,
+  list
 }
