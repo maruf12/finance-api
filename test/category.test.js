@@ -18,7 +18,7 @@ describe('POST /api/categoris', () => {
   it('should create a new category', async () => {
     const testGroup = await getTestGroup();
     const result = await supertest(web)
-      .post(`/api/${testGroup.id}/categories`)
+      .post(`/api/groups/${testGroup.id}/categories`)
       .set('Authorization', `test`)
       .send({
         name: 'Test Category',
@@ -36,7 +36,7 @@ describe('POST /api/categoris', () => {
   it('should reject if request invalid', async () => {
     const testGroup = await getTestGroup();
     const result = await supertest(web)
-      .post(`/api/${testGroup.id}/categories`)
+      .post(`/api/groups/${testGroup.id}/categories`)
       .set('Authorization', `test`)
       .send({
         name: '',

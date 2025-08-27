@@ -19,7 +19,7 @@ userRouter.delete('/api/groups/:groupId', groupController.remove);
 userRouter.get('/api/groups/', groupController.list);
 
 // Categories routes
-userRouter.post('/api/:groupId/categories', categoryController.create);
+userRouter.post('/api/groups/:groupId/categories', categoryController.create);
 userRouter.get('/api/groups/:groupId/categories/:categoryId', categoryController.get);
 userRouter.put('/api/groups/:groupId/categories/:categoryId', categoryController.update);
 userRouter.delete('/api/groups/:groupId/categories/:categoryId', categoryController.remove);
