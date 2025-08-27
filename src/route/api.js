@@ -1,6 +1,7 @@
 import express from 'express';
 import userController from '../controller/user-controller.js';
 import groupController from '../controller/group-controller.js';
+import categoryController from '../controller/category-controller.js';
 import { authMiddleware } from '../middleware/auth-middleware.js';
 
 const userRouter = new express.Router();
@@ -16,6 +17,9 @@ userRouter.get('/api/groups/:groupId', groupController.get);
 userRouter.put('/api/groups/:groupId', groupController.update);
 userRouter.delete('/api/groups/:groupId', groupController.remove);
 userRouter.get('/api/groups/', groupController.list);
+
+// Categories routes
+userRouter.post('/api/:groupId/categories', categoryController.create);
 
 export {
   userRouter
