@@ -1,3 +1,4 @@
+import expenseController from '../controller/expense-controller.js';
 import express from 'express';
 import userController from '../controller/user-controller.js';
 import groupController from '../controller/group-controller.js';
@@ -24,6 +25,10 @@ userRouter.get('/api/groups/:groupId/categories/:categoryId', categoryController
 userRouter.put('/api/groups/:groupId/categories/:categoryId', categoryController.update);
 userRouter.delete('/api/groups/:groupId/categories/:categoryId', categoryController.remove);
 userRouter.get('/api/groups/:groupId/categories', categoryController.list);
+
+// Expenses routes
+userRouter.post('/api/expenses', expenseController.create);
+userRouter.get('/api/expenses/:expenseId', expenseController.get);
 
 export {
   userRouter
