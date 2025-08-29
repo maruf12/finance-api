@@ -161,11 +161,15 @@ const remove = async (user, expenseId) => {
   return { message: "Expense deleted" };
 }
 
-const list = async (user, groupId) => {
-  // Jika groupId diberikan, filter berdasarkan group, jika tidak, tampilkan semua expense milik user
-  const where = groupId
-    ? { userUsername: user.username, groupId }
-    : { userUsername: user.username };
+const list = async (user, { groupId, categoryId, start_date, end_date }) => {
+  const where = { userUsername: user.username };
+  if (groupId) where.groupId = groupId;
+  if (categoryId) where.categoryId = categoryId;
+  if (start_date || end_date) {
+    where.tanggal = {};
+    if (start_date) where.tanggal.gte = new Date(start_date);
+    if (end_date) where.tanggal.lte = new Date(end_date);
+  }
   return prismaClient.expense.findMany({
     where,
     select: {

@@ -54,8 +54,8 @@ const remove = async (req, res, next) => {
 const list = async (req, res, next) => {
   try {
     const user = req.user;
-    const groupId = req.query.groupId;
-    const result = await expenseService.list(user, groupId);
+    const { groupId, categoryId, start_date, end_date } = req.query;
+    const result = await expenseService.list(user, { groupId, categoryId, start_date, end_date });
     res.status(200).json({
       data: result
     });
