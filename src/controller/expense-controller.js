@@ -26,7 +26,22 @@ const get = async (req, res, next) => {
   }
 };
 
+const update = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const expenseId = req.params.expenseId;
+    const request = req.body;
+    const result = await expenseService.update(user, expenseId, request);
+    res.status(200).json({
+      data: result
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   create,
-  get
+  get,
+  update
 };

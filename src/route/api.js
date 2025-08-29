@@ -29,6 +29,7 @@ userRouter.get('/api/groups/:groupId/categories', categoryController.list);
 // Expenses routes
 userRouter.post('/api/expenses', expenseController.create);
 userRouter.get('/api/expenses/:expenseId', expenseController.get);
+userRouter.put('/api/expenses/:expenseId', expenseController.update);
 
 export {
   userRouter

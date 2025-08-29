@@ -11,7 +11,17 @@ const createExpenseValidation = Joi.object({
 
 const getExpenseValidation = Joi.string().uuid().required();
 
+const updateExpenseValidation = Joi.object({
+  groupId: Joi.string().uuid().optional(),
+  categoryId: Joi.string().uuid().optional().allow(null),
+  tanggal: Joi.date().optional(),
+  title: Joi.string().max(255).optional(),
+  amount: Joi.number().optional(),
+  note: Joi.string().max(255).optional().allow(null)
+});
+
 export {
   createExpenseValidation,
-  getExpenseValidation
+  getExpenseValidation,
+  updateExpenseValidation
 }
