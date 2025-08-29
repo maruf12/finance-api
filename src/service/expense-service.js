@@ -74,6 +74,9 @@ const update = async (user, expenseId, request) => {
 const create = async (user, request) => {
   const expense = validate(createExpenseValidation, request);
   expense.userUsername = user.username;
+  if (!expense.tanggal) {
+    expense.tanggal = new Date().toISOString();
+  }
 
   // Pastikan groupId valid dan milik user
   const group = await prismaClient.group.findFirst({
