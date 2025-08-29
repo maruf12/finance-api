@@ -161,7 +161,8 @@ const remove = async (user, expenseId) => {
   return { message: "Expense deleted" };
 }
 
-const list = async (user, { groupId, categoryId, start_date, end_date }) => {
+
+const list = async (user, { groupId, categoryId, start_date, end_date, page = 1, limit = 10 }) => {
   const where = { userUsername: user.username };
   if (groupId) where.groupId = groupId;
   if (categoryId) where.categoryId = categoryId;
@@ -170,20 +171,39 @@ const list = async (user, { groupId, categoryId, start_date, end_date }) => {
     if (start_date) where.tanggal.gte = new Date(start_date);
     if (end_date) where.tanggal.lte = new Date(end_date);
   }
-  return prismaClient.expense.findMany({
-    where,
-    select: {
-      id: true,
-      groupId: true,
-      categoryId: true,
-      tanggal: true,
-      title: true,
-      amount: true,
-      note: true,
-      createdAt: true,
-      updatedAt: true,
+  page = parseInt(page) > 0 ? parseInt(page) : 1;
+  limit = parseInt(limit) > 0 ? parseInt(limit) : 10;
+  const skip = (page - 1) * limit;
+  const [total, data] = await Promise.all([
+    prismaClient.expense.count({ where }),
+    prismaClient.expense.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { tanggal: 'desc' },
+      select: {
+        id: true,
+        groupId: true,
+        categoryId: true,
+        tanggal: true,
+        title: true,
+        amount: true,
+        note: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    })
+  ]);
+  const totalPages = Math.ceil(total / limit);
+  return {
+    data,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages
     }
-  });
+  };
 }
 
 export default {
