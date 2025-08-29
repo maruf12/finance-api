@@ -142,8 +142,28 @@ const get = async (user, expenseId) => {
   return expense;
 };
 
+const remove = async (user, expenseId) => {
+  expenseId = validate(getExpenseValidation, expenseId);
+  // Pastikan expense ada dan milik user
+  const expense = await prismaClient.expense.findFirst({
+    where: {
+      id: expenseId,
+      userUsername: user.username,
+    },
+    select: { id: true }
+  });
+  if (!expense) {
+    throw new ResponseError(404, "Expense not found");
+  }
+  await prismaClient.expense.delete({
+    where: { id: expenseId }
+  });
+  return { message: "Expense deleted" };
+}
+
 export default {
   create,
   get,
-  update
+  update,
+  remove
 };

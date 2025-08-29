@@ -40,8 +40,20 @@ const update = async (req, res, next) => {
   }
 };
 
+const remove = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const expenseId = req.params.expenseId;
+    const result = await expenseService.remove(user, expenseId);
+    res.status(200).json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   create,
   get,
-  update
+  update,
+  remove
 };

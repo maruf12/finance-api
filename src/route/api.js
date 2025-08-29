@@ -30,6 +30,7 @@ userRouter.get('/api/groups/:groupId/categories', categoryController.list);
 userRouter.post('/api/expenses', expenseController.create);
 userRouter.get('/api/expenses/:expenseId', expenseController.get);
 userRouter.put('/api/expenses/:expenseId', expenseController.update);
+userRouter.delete('/api/expenses/:expenseId', expenseController.remove);
 
 export {
   userRouter
