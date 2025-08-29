@@ -1,9 +1,11 @@
 import supertest from 'supertest';
 import { web } from '../src/application/web.js';
 import { createTestUser, removeTestUser, createTestGroup, removeAllTestGroup, getTestGroup, createTestCategory, removeAllTestCategory, getTestCategory } from './test-utils.js';
+import { logger } from '../src/application/logging.js';
 
 describe('POST /api/expenses', () => {
   beforeEach(async () => {
+    await removeTestUser();
     await createTestUser();
     await createTestGroup();
     await createTestCategory();
@@ -108,6 +110,7 @@ describe('POST /api/expenses', () => {
 describe('GET /api/expenses/:expenseId', () => {
   let expenseId;
   beforeEach(async () => {
+    await removeTestUser();
     await createTestUser();
     await createTestGroup();
     await createTestCategory();
@@ -160,6 +163,7 @@ describe('GET /api/expenses/:expenseId', () => {
 describe('PUT /api/expenses/:expenseId', () => {
   let expenseId;
   beforeEach(async () => {
+    await removeTestUser();
     await createTestUser();
     await createTestGroup();
     await createTestCategory();
@@ -264,6 +268,7 @@ describe('PUT /api/expenses/:expenseId', () => {
 describe('DELETE /api/expenses/:expenseId', () => {
   let expenseId;
   beforeEach(async () => {
+    await removeTestUser();
     await createTestUser();
     await createTestGroup();
     await createTestCategory();
@@ -309,6 +314,7 @@ describe('DELETE /api/expenses/:expenseId', () => {
 
 describe('GET /api/expenses', () => {
   beforeEach(async () => {
+    await removeTestUser();
     await createTestUser();
     await createTestGroup();
     await createTestCategory();
@@ -370,3 +376,85 @@ describe('GET /api/expenses', () => {
     expect(result.body.data[0].groupId).toBe(testGroup.id);
   });
 });
+
+  it('should filter expenses by categoryId', async () => {
+    // Pastikan semua data test dihapus sebelum membuat user, grup, kategori
+    await removeAllTestGroup();
+    await removeAllTestCategory();
+    await removeTestUser();
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    // Buat expense dengan kategori tersebut
+    await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: new Date().toISOString(),
+        title: 'Expense Filter Cat',
+        amount: 1234,
+        note: 'Filter by category'
+      });
+    const result = await supertest(web)
+      .get(`/api/expenses?categoryId=${testCategory.id}`)
+      .set('Authorization', 'test');
+    expect(result.status).toBe(200);
+    expect(Array.isArray(result.body.data)).toBe(true);
+    expect(result.body.data.length).toBeGreaterThanOrEqual(1);
+    for (const exp of result.body.data) {
+      expect(exp.categoryId).toBe(testCategory.id);
+    }
+  });
+
+  it('should filter expenses by start_date and end_date', async () => {
+    await removeAllTestGroup();
+    await removeAllTestCategory();
+    await removeTestUser();
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    const now = new Date();
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    // Create expense with yesterday's date
+    await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: yesterday.toISOString(),
+        title: 'Expense Yesterday',
+        amount: 3000,
+        note: 'Yesterday'
+      });
+    // Create expense with today
+    await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: now.toISOString(),
+        title: 'Expense Today',
+        amount: 4000,
+        note: 'Today'
+      });
+    // Filter only today and tomorrow
+    const result = await supertest(web)
+      .get(`/api/expenses?start_date=${now.toISOString()}&end_date=${tomorrow.toISOString()}`)
+      .set('Authorization', 'test');
+    expect(result.status).toBe(200);
+    expect(Array.isArray(result.body.data)).toBe(true);
+    // Semua tanggal expense >= now && <= tomorrow
+    for (const exp of result.body.data) {
+      expect(new Date(exp.tanggal) >= now).toBe(true);
+      expect(new Date(exp.tanggal) <= tomorrow).toBe(true);
+    }
+  });
