@@ -161,9 +161,31 @@ const remove = async (user, expenseId) => {
   return { message: "Expense deleted" };
 }
 
+const list = async (user, groupId) => {
+  // Jika groupId diberikan, filter berdasarkan group, jika tidak, tampilkan semua expense milik user
+  const where = groupId
+    ? { userUsername: user.username, groupId }
+    : { userUsername: user.username };
+  return prismaClient.expense.findMany({
+    where,
+    select: {
+      id: true,
+      groupId: true,
+      categoryId: true,
+      tanggal: true,
+      title: true,
+      amount: true,
+      note: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  });
+}
+
 export default {
   create,
   get,
   update,
-  remove
+  remove,
+  list
 };

@@ -31,6 +31,7 @@ userRouter.post('/api/expenses', expenseController.create);
 userRouter.get('/api/expenses/:expenseId', expenseController.get);
 userRouter.put('/api/expenses/:expenseId', expenseController.update);
 userRouter.delete('/api/expenses/:expenseId', expenseController.remove);
+userRouter.get('/api/expenses', expenseController.list);
 
 export {
   userRouter
