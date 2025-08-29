@@ -458,3 +458,50 @@ describe('GET /api/expenses', () => {
       expect(new Date(exp.tanggal) <= tomorrow).toBe(true);
     }
   });
+
+  it('should paginate expenses (default 10 per page)', async () => {
+    await removeAllTestGroup();
+    await removeAllTestCategory();
+    await removeTestUser();
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    // Buat 15 expense
+    for (let i = 1; i <= 15; i++) {
+      await supertest(web)
+        .post('/api/expenses')
+        .set('Authorization', 'test')
+        .send({
+          groupId: testGroup.id,
+          categoryId: testCategory.id,
+          tanggal: new Date().toISOString(),
+          title: `Expense ${i}`,
+          amount: 1000 + i,
+          note: `Note ${i}`
+        });
+    }
+    // Test halaman pertama
+    const result1 = await supertest(web)
+      .get('/api/expenses')
+      .set('Authorization', 'test');
+    expect(result1.status).toBe(200);
+    expect(Array.isArray(result1.body.data)).toBe(true);
+    expect(result1.body.data.length).toBe(10);
+    expect(result1.body.meta.page).toBe(1);
+    expect(result1.body.meta.limit).toBe(10);
+    expect(result1.body.meta.total).toBe(15);
+    expect(result1.body.meta.totalPages).toBe(2);
+    // Test halaman kedua
+    const result2 = await supertest(web)
+      .get('/api/expenses?page=2')
+      .set('Authorization', 'test');
+    expect(result2.status).toBe(200);
+    expect(Array.isArray(result2.body.data)).toBe(true);
+    expect(result2.body.data.length).toBe(5);
+    expect(result2.body.meta.page).toBe(2);
+    expect(result2.body.meta.limit).toBe(10);
+    expect(result2.body.meta.total).toBe(15);
+    expect(result2.body.meta.totalPages).toBe(2);
+  });
