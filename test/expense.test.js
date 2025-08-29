@@ -260,3 +260,49 @@ describe('PUT /api/expenses/:expenseId', () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe('DELETE /api/expenses/:expenseId', () => {
+  let expenseId;
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    // Create expense
+    const result = await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: new Date().toISOString(),
+        title: 'Test Expense',
+        amount: 10000,
+        note: 'Test expense note'
+      });
+    expenseId = result.body.data.id;
+  });
+
+  afterEach(async () => {
+    await removeAllTestCategory();
+    await removeAllTestGroup();
+    await removeTestUser();
+  });
+
+  it('should delete expense by id', async () => {
+    const result = await supertest(web)
+      .delete(`/api/expenses/${expenseId}`)
+      .set('Authorization', 'test');
+    expect(result.status).toBe(200);
+    expect(result.body.message).toBe('Expense deleted');
+  });
+
+  it('should reject if expense not found', async () => {
+    const result = await supertest(web)
+      .delete('/api/expenses/invalid-uuid')
+      .set('Authorization', 'test');
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+});
