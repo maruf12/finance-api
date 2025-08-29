@@ -306,3 +306,67 @@ describe('DELETE /api/expenses/:expenseId', () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe('GET /api/expenses', () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    // Create beberapa expense
+    await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: new Date().toISOString(),
+        title: 'Expense 1',
+        amount: 1000,
+        note: 'Note 1'
+      });
+    await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: new Date().toISOString(),
+        title: 'Expense 2',
+        amount: 2000,
+        note: 'Note 2'
+      });
+  });
+
+  afterEach(async () => {
+    await removeAllTestCategory();
+    await removeAllTestGroup();
+    await removeTestUser();
+  });
+
+  it('should list all expenses for user', async () => {
+    const result = await supertest(web)
+      .get('/api/expenses')
+      .set('Authorization', 'test');
+    expect(result.status).toBe(200);
+    expect(Array.isArray(result.body.data)).toBe(true);
+    expect(result.body.data.length).toBeGreaterThanOrEqual(2);
+    expect(result.body.data[0].id).toBeDefined();
+    expect(result.body.data[0].title).toBeDefined();
+    expect(result.body.data[0].amount).toBeDefined();
+    expect(result.body.data[0].createdAt).toBeDefined();
+    expect(result.body.data[0].updatedAt).toBeDefined();
+  });
+
+  it('should list expenses by groupId', async () => {
+    const testGroup = await getTestGroup();
+    const result = await supertest(web)
+      .get(`/api/expenses?groupId=${testGroup.id}`)
+      .set('Authorization', 'test');
+    expect(result.status).toBe(200);
+    expect(Array.isArray(result.body.data)).toBe(true);
+    expect(result.body.data.length).toBeGreaterThanOrEqual(2);
+    expect(result.body.data[0].groupId).toBe(testGroup.id);
+  });
+});
