@@ -156,3 +156,107 @@ describe('GET /api/expenses/:expenseId', () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe('PUT /api/expenses/:expenseId', () => {
+  let expenseId;
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestGroup();
+    await createTestCategory();
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    // Create expense
+    const result = await supertest(web)
+      .post('/api/expenses')
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: testCategory.id,
+        tanggal: new Date().toISOString(),
+        title: 'Test Expense',
+        amount: 10000,
+        note: 'Test expense note'
+      });
+    expenseId = result.body.data.id;
+  });
+
+  afterEach(async () => {
+    await removeAllTestCategory();
+    await removeAllTestGroup();
+    await removeTestUser();
+  });
+
+  it('should update expense detail', async () => {
+    const testGroup = await getTestGroup();
+    const testCategory = await getTestCategory();
+    const result = await supertest(web)
+      .put(`/api/expenses/${expenseId}`)
+      .set('Authorization', 'test')
+      .send({
+        title: 'Updated Expense',
+        amount: 20000,
+        note: 'Updated note',
+        groupId: testGroup.id,
+        categoryId: testCategory.id
+      });
+    expect(result.status).toBe(200);
+    expect(result.body.data.title).toBe('Updated Expense');
+    expect(result.body.data.amount).toBe("20000");
+    expect(result.body.data.note).toBe('Updated note');
+    expect(result.body.data.groupId).toBe(testGroup.id);
+    expect(result.body.data.categoryId).toBe(testCategory.id);
+    expect(result.body.data.updatedAt).toBeDefined();
+  });
+
+  it('should reject if expense not found', async () => {
+    const result = await supertest(web)
+      .put('/api/expenses/invalid-uuid')
+      .set('Authorization', 'test')
+      .send({
+        title: 'Updated Expense',
+        amount: 20000
+      });
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it('should reject if group not found', async () => {
+    const result = await supertest(web)
+      .put(`/api/expenses/${expenseId}`)
+      .set('Authorization', 'test')
+      .send({
+        groupId: 'invalid-uuid',
+        title: 'Updated Expense',
+        amount: 20000
+      });
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it('should reject if category not found in group', async () => {
+    const testGroup = await getTestGroup();
+    const result = await supertest(web)
+      .put(`/api/expenses/${expenseId}`)
+      .set('Authorization', 'test')
+      .send({
+        groupId: testGroup.id,
+        categoryId: 'invalid-uuid',
+        title: 'Updated Expense',
+        amount: 20000
+      });
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it('should reject if request invalid', async () => {
+    const result = await supertest(web)
+      .put(`/api/expenses/${expenseId}`)
+      .set('Authorization', 'test')
+      .send({
+        title: '',
+        amount: null
+      });
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+});
